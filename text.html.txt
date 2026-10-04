@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TAB Site Work Tracking Dashboard - Mobile</title>
+    <title>TAB Site Work Tracking Dashboard </title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -177,8 +177,8 @@
                     <option value="ALL">All Systems</option>
                     <option value="AHU">AHU (Air Handling)</option>
                     <option value="FCU">FCU (Fan Coil)</option>
-                    <option value="VAV">VAV Box</option>
-                    <option value="VCD">VCD (Volume Control)</option>
+                    <option value="FAHU">FAHU Box</option>
+                    <option value="VCD">VCD (Volume Installed)</option>
                     <option value="PUMP">Chilled Water Pump</option>
                     <option value="DAMPER">Fire Damper</option>
                 </select>
