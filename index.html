@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TAB Site Work Tracking Mobile Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        tabBlue: '#0284c7',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom smooth scrollbar & mobile styling adjustments */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        /* Mobile tap highlight elimination */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 antialiased min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
+
+    <!-- TOP NAVIGATION HEADER -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <div class="bg-sky-600 p-2 rounded-lg text-white shadow flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-gauge-high text-lg sm:text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-base sm:text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                            TAB Field Master <span class="bg-sky-500/20 text-sky-400 text-[10px] sm:text-xs px-2 py-0.5 rounded border border-sky-500/30 font-semibold">Mobile App</span>
+                        </h1>
+                        <p class="text-[11px] sm:text-xs text-slate-400">Testing, Adjusting & Balancing Field Tracker</p>
+                    </div>
+                </div>
+
+                <!-- Reset icon on header for quick access on mobile -->
+                <button onclick="resetToDefaults()" title="Reset Sample Data" class="sm:hidden bg-slate-800 hover:bg-slate-700 text-slate-400 p-2 rounded-lg text-xs transition border border-slate-700">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+            </div>
+
+            <!-- Header Buttons -->
+            <div class="flex items-center gap-2">
+                <button onclick="openModal()" class="flex-1 sm:flex-initial bg-sky-600 active:bg-sky-700 text-white px-3.5 py-2.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition shadow flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    <span>Add Equipment Tag</span>
+                </button>
+                <button onclick="exportToCSV()" class="bg-slate-800 active:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-file-csv text-emerald-400"></i>
+                    <span class="hidden sm:inline">Export Report</span>
+                </button>
+                <button onclick="resetToDefaults()" title="Reset Sample Data" class="hidden sm:flex bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 p-2 rounded-lg text-sm transition">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 w-full space-y-4 sm:space-y-6">
+
+        <!-- METRICS / SUMMARY BAR (2x2 Grid on Mobile, 4-Col on Desktop) -->
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+            <!-- Total Units -->
+            <div class="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-slate-200/80 flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Units</p>
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mt-0.5 sm:mt-1" id="stat-total">0</h3>
+                    <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5" id="stat-total-sub">All systems</p>
+                </div>
+                <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-sm sm:text-xl shrink-0">
+                    <i class="fa-solid fa-cubes"></i>
+                </div>
+            </div>
+
+            <!-- Completed Units -->
+            <div class="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-slate-200/80 flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] sm:text-xs font-semibold text-emerald-600 uppercase tracking-wider">Completed</p>
+                    <h3 class="text-xl sm:text-2xl font-bold text-emerald-600 mt-0.5 sm:mt-1" id="stat-completed">0</h3>
+                    <p class="text-[10px] sm:text-xs text-emerald-700/70 mt-0.5"><i class="fa-solid fa-circle-check"></i> Passed</p>
+                </div>
+                <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm sm:text-xl shrink-0">
+                    <i class="fa-solid fa-check-double"></i>
+                </div>
+            </div>
+
+            <!-- Pending Units -->
+            <div class="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-slate-200/80 flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] sm:text-xs font-semibold text-amber-600 uppercase tracking-wider">Pending</p>
+                    <h3 class="text-xl sm:text-2xl font-bold text-amber-600 mt-0.5 sm:mt-1" id="stat-pending">0</h3>
+                    <p class="text-[10px] sm:text-xs text-amber-700/70 mt-0.5"><i class="fa-solid fa-clock"></i> Open field</p>
+                </div>
+                <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm sm:text-xl shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+
+            <!-- Progress Percentage Bar Card -->
+            <div class="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-slate-200/80 flex flex-col justify-between">
+                <div class="flex justify-between items-center">
+                    <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Progress</p>
+                    <span class="text-[10px] sm:text-xs font-bold text-sky-700 bg-sky-50 px-1.5 sm:px-2 py-0.5 rounded-full" id="stat-percent-badge">0%</span>
+                </div>
+                <div class="my-1 sm:my-2">
+                    <div class="flex justify-between items-baseline mb-1">
+                        <span class="text-lg sm:text-xl font-extrabold text-slate-800" id="stat-percent-text">0%</span>
+                        <span class="text-[10px] sm:text-xs text-slate-400" id="stat-ratio">0/0</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2.5 sm:h-3 overflow-hidden border border-slate-200">
+                        <div id="stat-progress-bar" class="bg-sky-600 h-2.5 sm:h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FILTER & SEARCH CONTROL BAR -->
+        <section class="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-slate-200 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            <!-- Status Filter Tabs (Scrollable on phones) -->
+            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-lg overflow-x-auto w-full md:w-auto">
+                <button onclick="setStatusFilter('ALL')" id="filter-btn-ALL" class="filter-tab flex-1 sm:flex-initial text-center px-3 py-2 sm:py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-white shadow-sm transition whitespace-nowrap">
+                    All (<span id="count-all">0</span>)
+                </button>
+                <button onclick="setStatusFilter('COMPLETED')" id="filter-btn-COMPLETED" class="filter-tab flex-1 sm:flex-initial text-center px-3 py-2 sm:py-1.5 rounded-md text-xs font-semibold text-slate-500 hover:text-slate-700 transition whitespace-nowrap">
+                    Done (<span id="count-completed">0</span>)
+                </button>
+                <button onclick="setStatusFilter('PENDING')" id="filter-btn-PENDING" class="filter-tab flex-1 sm:flex-initial text-center px-3 py-2 sm:py-1.5 rounded-md text-xs font-semibold text-slate-500 hover:text-slate-700 transition whitespace-nowrap">
+                    Pending (<span id="count-pending">0</span>)
+                </button>
+            </div>
+
+            <!-- Search + System & Floor Dropdowns -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
+                <!-- Search Box -->
+                <div class="relative sm:col-span-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 sm:top-2.5 text-xs text-slate-400"></i>
+                    <input type="text" id="search-input" onkeyup="renderTable()" placeholder="Search Tag, Tech, Zone..." 
+                           class="w-full pl-8 pr-3 py-2 sm:py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-700">
+                </div>
+
+                <!-- System Filter -->
+                <select id="filter-system" onchange="renderTable()" class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-2 sm:py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                    <option value="ALL">All Systems</option>
+                    <option value="AHU">AHU (Air Handling)</option>
+                    <option value="FCU">FCU (Fan Coil)</option>
+                    <option value="VAV">VAV Box</option>
+                    <option value="VCD">VCD (Volume Control)</option>
+                    <option value="PUMP">Chilled Water Pump</option>
+                    <option value="DAMPER">Fire Damper</option>
+                </select>
+
+                <!-- Floor Filter -->
+                <select id="filter-floor" onchange="renderTable()" class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-2 sm:py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                    <option value="ALL">All Floors</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- MAIN WORK CHECKLIST SECTION -->
+        <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="px-4 py-3 sm:px-5 sm:py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-sky-600"></i>
+                    <h2 class="font-semibold text-slate-800 text-xs sm:text-sm">Site Work Inspection Checklist</h2>
+                </div>
+                <div class="text-[11px] sm:text-xs text-slate-500">
+                    Showing <span id="visible-count" class="font-bold text-slate-700">0</span> units
+                </div>
+            </div>
+
+            <!-- 1. MOBILE FIELD CARDS VIEW (Displays on small screens < md) -->
+            <div id="mobile-cards-container" class="block md:hidden divide-y divide-slate-100 p-2 space-y-3">
+                <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- 2. DESKTOP TABLE VIEW (Displays on screens >= md) -->
+            <div class="hidden md:block overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[850px]">
+                    <thead>
+                        <tr class="bg-slate-100/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                            <th class="py-3 px-4 w-12 text-center">Status</th>
+                            <th class="py-3 px-4">Tag ID & System</th>
+                            <th class="py-3 px-4">Floor / Area</th>
+                            <th class="py-3 px-4 w-72">TAB Sub-Tasks Checklist</th>
+                            <th class="py-3 px-4">Assigned Tech</th>
+                            <th class="py-3 px-4">Updated</th>
+                            <th class="py-3 px-4">Remarks</th>
+                            <th class="py-3 px-4 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="divide-y divide-slate-200 text-xs text-slate-700">
+                        <!-- Dynamic content populated via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State Display -->
+            <div id="empty-state" class="hidden py-12 text-center px-4">
+                <div class="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 text-xl mb-3">
+                    <i class="fa-solid fa-filter-circle-xmark"></i>
+                </div>
+                <h4 class="text-xs sm:text-sm font-semibold text-slate-700">No TAB items matched your criteria</h4>
+                <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Try clearing filters or search keywords</p>
+                <button onclick="resetFilters()" class="mt-3 text-xs text-sky-600 font-semibold hover:underline">Clear Filters</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- ADD / EDIT MODAL FORM (Mobile-optimized with scroll bar) -->
+    <div id="item-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden">
+        <div class="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-lg overflow-hidden transform transition-all max-h-[92vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="bg-slate-900 text-white px-4 sm:px-6 py-3.5 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-wrench text-sky-400"></i>
+                    <h3 class="font-bold text-sm sm:text-base" id="modal-title">Add Equipment Work Tag</h3>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Form -->
+            <form id="equipment-form" onsubmit="saveItem(event)" class="p-4 sm:p-6 space-y-3.5 overflow-y-auto flex-1 text-xs">
+                <input type="hidden" id="form-id">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Tag ID -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Unit Tag ID *</label>
+                        <input type="text" id="form-tag" required placeholder="e.g. AHU-L02-01" 
+                               class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none uppercase">
+                    </div>
+                    <!-- System Type -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">System Type *</label>
+                        <select id="form-system" required class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none bg-white">
+                            <option value="AHU">AHU - Air Handling Unit</option>
+                            <option value="FCU">FCU - Fan Coil Unit</option>
+                            <option value="VAV">VAV - Variable Air Volume</option>
+                            <option value="VCD">VCD - Volume Control Damper</option>
+                            <option value="PUMP">Chilled Water Pump</option>
+                            <option value="DAMPER">Fire / Smoke Damper</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Floor/Zone -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Floor / Zone *</label>
+                        <input type="text" id="form-floor" required placeholder="e.g. Level 2 - Zone A" 
+                               class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    </div>
+                    <!-- Assigned Tech -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Assigned TAB Tech *</label>
+                        <input type="text" id="form-tech" required placeholder="e.g. John / Team Alpha" 
+                               class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Overall Status -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Overall Status</label>
+                    <select id="form-status" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none bg-white">
+                        <option value="PENDING">Pending (In Progress)</option>
+                        <option value="COMPLETED">Completed (Passed TAB)</option>
+                    </select>
+                </div>
+
+                <!-- Sub-tasks Setup -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Field Checklist Sub-Tasks</label>
+                    <div class="grid grid-cols-2 gap-2 p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                        <label class="flex items-center gap-2 cursor-pointer py-1">
+                            <input type="checkbox" id="form-task-pre" class="rounded text-sky-600 focus:ring-sky-500 w-4 h-4"> Pre-Check
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer py-1">
+                            <input type="checkbox" id="form-task-air" class="rounded text-sky-600 focus:ring-sky-500 w-4 h-4"> Airflow
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer py-1">
+                            <input type="checkbox" id="form-task-water" class="rounded text-sky-600 focus:ring-sky-500 w-4 h-4"> Water Flow
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer py-1">
+                            <input type="checkbox" id="form-task-vcd" class="rounded text-sky-600 focus:ring-sky-500 w-4 h-4"> Damper
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer py-1 col-span-2">
+                            <input type="checkbox" id="form-task-report" class="rounded text-sky-600 focus:ring-sky-500 w-4 h-4"> Final TAB Report
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Remarks -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Notes / Field Remarks</label>
+                    <textarea id="form-notes" rows="2" placeholder="e.g. Design vs Actual CFM delta within 5%..." 
+                              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-200 shrink-0">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2.5 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2.5 bg-sky-600 active:bg-sky-700 text-white rounded-lg text-xs font-medium shadow">
+                        Save Item Tag
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Toast Notification (Bottom Mobile Pop) -->
+    <div id="toast" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-5 sm:w-auto bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl text-xs flex items-center gap-3 transition-all duration-300 opacity-0 translate-y-10 pointer-events-none z-50">
+        <i id="toast-icon" class="fa-solid fa-circle-info text-sky-400 text-base shrink-0"></i>
+        <span id="toast-msg" class="flex-1">Operation completed</span>
+    </div>
+
+    <footer class="bg-white border-t border-slate-200 py-3 sm:py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-[11px] sm:text-xs text-slate-500">
+            TAB Site Work Tracking Dashboard &bull; HVAC Field Checklist System
+        </div>
+    </footer>
+
+    <script>
+        // Initial Sample HVAC / TAB Site Data
+        const SAMPLE_DATA = [
+            {
+                id: '1',
+                tag: 'AHU-L01-01',
+                system: 'AHU',
+                floor: 'Level 1',
+                tech: 'Dave / Team A',
+                status: 'COMPLETED',
+                tasks: { pre: true, air: true, water: true, vcd: true, report: true },
+                updatedAt: '2026-09-10 14:30',
+                notes: 'Design 4500 CFM achieved (Actual 4480 CFM). Sound level normal.'
+            },
+            {
+                id: '2',
+                tag: 'FCU-L01-04',
+                system: 'FCU',
+                floor: 'Level 1',
+                tech: 'Sam / Team B',
+                status: 'PENDING',
+                tasks: { pre: true, air: true, water: false, vcd: false, report: false },
+                updatedAt: '2026-09-11 09:15',
+                notes: 'Chilled water valve actuator needs recalibration.'
+            },
+            {
+                id: '3',
+                tag: 'VAV-L02-12',
+                system: 'VAV',
+                floor: 'Level 2',
+                tech: 'Dave / Team A',
+                status: 'PENDING',
+                tasks: { pre: true, air: false, water: false, vcd: false, report: false },
+                updatedAt: '2026-09-11 11:00',
+                notes: 'Waiting for BMS integration check before balancing.'
+            },
+            {
+                id: '4',
+                tag: 'VCD-L02-08',
+                system: 'VCD',
+                floor: 'Level 2',
+                tech: 'Alex / Team C',
+                status: 'COMPLETED',
+                tasks: { pre: true, air: true, water: true, vcd: true, report: true },
+                updatedAt: '2026-09-09 16:45',
+                notes: 'Quadrant damper locked and tagged.'
+            },
+            {
+                id: '5',
+                tag: 'CHWP-B1-02',
+                system: 'PUMP',
+                floor: 'Basement 1',
+                tech: 'Dave / Team A',
+                status: 'COMPLETED',
+                tasks: { pre: true, air: true, water: true, vcd: true, report: true },
+                updatedAt: '2026-09-12 08:20',
+                notes: 'Flow rate 350 GPM verified via ultrasonic meter.'
+            },
+            {
+                id: '6',
+                tag: 'FD-L03-01',
+                system: 'DAMPER',
+                floor: 'Level 3',
+                tech: 'Sam / Team B',
+                status: 'PENDING',
+                tasks: { pre: false, air: false, water: false, vcd: false, report: false },
+                updatedAt: '2026-09-08 10:00',
+                notes: 'Fusible link test pending fire alarm team arrival.'
+            }
+        ];
+
+        // State variables
+        let items = [];
+        let currentStatusFilter = 'ALL';
+
+        // Load items from local storage or set defaults
+        function initApp() {
+            const stored = localStorage.getItem('tab_site_items_data');
+            if (stored) {
+                try {
+                    items = JSON.parse(stored);
+                } catch (e) {
+                    items = [...SAMPLE_DATA];
+                }
+            } else {
+                items = [...SAMPLE_DATA];
+            }
+
+            populateFloorFilter();
+            renderTable();
+            updateMetrics();
+        }
+
+        // Save current items array to local storage
+        function saveToStorage() {
+            localStorage.setItem('tab_site_items_data', JSON.stringify(items));
+            updateMetrics();
+        }
+
+        // Reset to default sample data
+        function resetToDefaults() {
+            if (confirm("Reset tracking list to default sample items? Custom data will be replaced.")) {
+                items = [...SAMPLE_DATA];
+                saveToStorage();
+                populateFloorFilter();
+                renderTable();
+                showToast("Data reset to default sample items.", "fa-rotate");
+            }
+        }
+
+        // Dynamic Floor/Area filter list
+        function populateFloorFilter() {
+            const floorSelect = document.getElementById('filter-floor');
+            const currentVal = floorSelect.value;
+            const floors = Array.from(new Set(items.map(i => i.floor))).sort();
+
+            floorSelect.innerHTML = '<option value="ALL">All Floors</option>';
+            floors.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f;
+                opt.textContent = f;
+                floorSelect.appendChild(opt);
+            });
+
+            if (floors.includes(currentVal)) {
+                floorSelect.value = currentVal;
+            }
+        }
+
+        // Date formatter helper
+        function getCurrentTimestamp() {
+            const now = new Date();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const hh = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+        }
+
+        // Toast feedback notifier
+        function showToast(msg, iconClass = "fa-circle-check") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.textContent = msg;
+            toastIcon.className = `fa-solid ${iconClass} text-sky-400 text-base`;
+
+            toast.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // Calculate Metrics and Summary Bar Updates
+        function updateMetrics() {
+            const total = items.length;
+            const completed = items.filter(i => i.status === 'COMPLETED').length;
+            const pending = total - completed;
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-completed').textContent = completed;
+            document.getElementById('stat-pending').textContent = pending;
+            document.getElementById('stat-percent-text').textContent = `${percent}%`;
+            document.getElementById('stat-percent-badge').textContent = `${percent}%`;
+            document.getElementById('stat-ratio').textContent = `${completed}/${total} Done`;
+
+            const progressBar = document.getElementById('stat-progress-bar');
+            progressBar.style.width = `${percent}%`;
+            
+            // Adjust bar color based on percentage
+            if (percent === 100) {
+                progressBar.className = 'bg-emerald-500 h-2.5 sm:h-3 rounded-full transition-all duration-500';
+            } else if (percent > 50) {
+                progressBar.className = 'bg-sky-600 h-2.5 sm:h-3 rounded-full transition-all duration-500';
+            } else {
+                progressBar.className = 'bg-amber-500 h-2.5 sm:h-3 rounded-full transition-all duration-500';
+            }
+
+            // Tab badge counts
+            document.getElementById('count-all').textContent = total;
+            document.getElementById('count-completed').textContent = completed;
+            document.getElementById('count-pending').textContent = pending;
+        }
+
+        // Filter tab switcher
+        function setStatusFilter(status) {
+            currentStatusFilter = status;
+            document.querySelectorAll('.filter-tab').forEach(btn => {
+                btn.className = 'filter-tab flex-1 sm:flex-initial text-center px-3 py-2 sm:py-1.5 rounded-md text-xs font-semibold text-slate-500 hover:text-slate-700 transition whitespace-nowrap';
+            });
+            const activeBtn = document.getElementById(`filter-btn-${status}`);
+            if (activeBtn) {
+                activeBtn.className = 'filter-tab flex-1 sm:flex-initial text-center px-3 py-2 sm:py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-white shadow-sm transition border border-slate-200/60 whitespace-nowrap';
+            }
+            renderTable();
+        }
+
+        function resetFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('filter-system').value = 'ALL';
+            document.getElementById('filter-floor').value = 'ALL';
+            setStatusFilter('ALL');
+        }
+
+        // Render Work Checklist (Both Desktop Table & Mobile Card View)
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            const mobileCards = document.getElementById('mobile-cards-container');
+            const emptyState = document.getElementById('empty-state');
+
+            const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+            const systemFilter = document.getElementById('filter-system').value;
+            const floorFilter = document.getElementById('filter-floor').value;
+
+            tbody.innerHTML = '';
+            mobileCards.innerHTML = '';
+
+            const filteredItems = items.filter(item => {
+                if (currentStatusFilter !== 'ALL' && item.status !== currentStatusFilter) return false;
+                if (systemFilter !== 'ALL' && item.system !== systemFilter) return false;
+                if (floorFilter !== 'ALL' && item.floor !== floorFilter) return false;
+                if (searchVal) {
+                    const matchTag = item.tag.toLowerCase().includes(searchVal);
+                    const matchTech = item.tech.toLowerCase().includes(searchVal);
+                    const matchFloor = item.floor.toLowerCase().includes(searchVal);
+                    const matchNotes = (item.notes || '').toLowerCase().includes(searchVal);
+                    if (!matchTag && !matchTech && !matchFloor && !matchNotes) return false;
+                }
+                return true;
+            });
+
+            document.getElementById('visible-count').textContent = filteredItems.length;
+
+            if (filteredItems.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filteredItems.forEach(item => {
+                const isDone = item.status === 'COMPLETED';
+                const tasks = item.tasks || { pre: false, air: false, water: false, vcd: false, report: false };
+
+                // ------------------------------------
+                // 1. MOBILE CARD ELEMENT RENDERING
+                // ------------------------------------
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-xl p-3.5 border border-slate-200/90 shadow-sm space-y-3";
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="font-bold text-slate-800 text-sm">${escapeHtml(item.tag)}</span>
+                                ${isDone 
+                                    ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-semibold">COMPLETED</span>' 
+                                    : '<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-semibold">PENDING</span>'
+                                }
+                            </div>
+                            <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
+                                <span><i class="fa-solid fa-layer-group text-slate-400"></i> ${escapeHtml(item.floor)}</span>
+                                <span>&bull;</span>
+                                <span class="font-semibold text-slate-700">${item.system}</span>
+                            </div>
+                        </div>
+
+                        <!-- Touch Status Toggle Button -->
+                        <button onclick="toggleMainStatus('${item.id}')" 
+                                class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition shadow-sm ${
+                                    isDone 
+                                    ? 'bg-emerald-500 text-white active:bg-emerald-600' 
+                                    : 'bg-slate-100 border border-slate-300 text-slate-400 active:bg-amber-500 active:text-white'
+                                }">
+                            <i class="fa-solid fa-check text-base font-bold"></i>
+                        </button>
+                    </div>
+
+                    <!-- Touch Subtasks Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 pt-1 text-[11px]">
+                        <label class="flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 p-2 rounded-lg active:bg-slate-100">
+                            <input type="checkbox" ${tasks.pre ? 'checked' : ''} onchange="toggleSubTask('${item.id}', 'pre')" class="rounded text-sky-600 focus:ring-sky-500 w-4 h-4">
+                            <span class="${tasks.pre ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">Pre-Check</span>
+                        </label>
+
+                        <label class="flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 p-2 rounded-lg active:bg-slate-100">
+                            <input type="checkbox" ${tasks.air ? 'checked' : ''} onchange="toggleSubTask('${item.id}', 'air')" class="rounded text-sky-600 focus:ring-sky-500 w-4 h-4">
+                            <span class="${tasks.air ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">Airflow</span>
+                        </label>
+
+                        <label class="flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 p-2 rounded-lg active:bg-slate-100">
+                            <input type="checkbox" ${tasks.water ? 'checked' : ''} onchange="toggleSubTask('${item.id}', 'water')" class="rounded text-sky-600 focus:ring-sky-500 w-4 h-4">
+                            <span class="${tasks.water ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">Water</span>
+                        </label>
+
+                        <label class="flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 p-2 rounded-lg active:bg-slate-100">
+                            <input type="checkbox" ${tasks.vcd ? 'checked' : ''} onchange="toggleSubTask('${item.id}', 'vcd')" class="rounded text-sky-600 focus:ring-sky-500 w-4 h-4">
+                            <span class="${tasks.vcd ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">VCD</span>
+                        </label>
+
+                        <label class="flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 p-2 rounded-lg active:bg-slate-100 col-span-2 sm:col-span-1">
+                            <input type="checkbox" ${tasks.report ? 'checked' : ''} onchange="toggleSubTask('${item.id}', 'report')" class="rounded text-sky-600 focus:ring-sky-500 w-4 h-4">
+                            <span class="${tasks.report ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">Report</span>
+                        </label>
+                    </div>
+
+                    <!-- Tech & Remarks info -->
+                    <div class="bg-slate-50 p-2.5 rounded-lg text-[11px] space-y-1">
+                        <div class="flex justify-between items-center text-slate-600">
+                            <span><i class="fa-solid fa-user-gear mr-1 text-slate-400"></i>${escapeHtml(item.tech)}</span>
+                            <span class="text-[10px] text-slate-400">${item.updatedAt}</span>
+                        </div>
+                        ${item.notes ? `<p class="text-slate-600 italic pt-1 border-t border-slate-200/60">${escapeHtml(item.notes)}</p>` : ''}
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
+                        <button onclick="editItem('${item.id}')" class="px-3 py-1.5 text-xs bg-slate-100 active:bg-slate-200 text-slate-700 rounded-lg flex items-center gap-1 font-medium">
+                            <i class="fa-solid fa-pen-to-square text-sky-600"></i> Edit
+                        </button>
+                        <button onclick="deleteItem('${item.id}')" class="px-3 py-1.5 text-xs bg-red-50 active:bg-red-100 text-red-600 rounded-lg flex items-center gap-1 font-medium">
+                            <i class="fa-solid fa-trash-can"></i> Delete
+                        </button>
+                    </div>
+                `;
+                mobileCards.appendChild(card);
+
+                // ------------------------------------
+                // 2. DESKTOP TABLE ROW RENDERING
+                // ------------------------------------
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="toggleMainStatus('${item.id}')" 
+                                class="w-7 h-7 rounded-lg flex items-center justify-center transition shadow-sm ${
+                                    isDone 
+                                    ? 'bg-emerald-500 text-white hover:bg-emerald-600 ring-2 ring-emerald-200' 
+                                    : 'bg-white border-2 border-slate-300 text-slate-300 hover:border-amber-500 hover:text-amber-500'
+                                }" title="${isDone ? 'Mark Pending' : 'Mark Completed'}">
+                            <i class="fa-solid fa-check text-xs font-bold"></i>
+                        </button>
+                    </td>
+
+                    <td class="py-3 px-4">
+                        <div class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                            <span>${escapeHtml(item.tag)}</span>
+                            ${isDone 
+                                ? '<span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-medium">DONE</span>' 
+                                : '<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-medium">PENDING</span>'
+                            }
+                        </div>
+                        <div class="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                            <span class="font-semibold text-slate-600">${item.system}</span> &bull; HVAC Unit
+                        </div>
+                    </td>
+
+                    <td class="py-3 px-4 text-xs font-medium text-slate-700">
+                        <i class="fa-solid fa-layer-group text-slate-400 mr-1 text-[10px]"></i> ${escapeHtml(item.floor)}
+                    </td>
+
+                    <td class="py-3 px-4">
+                        <div class="flex flex-wrap gap-1.5 text-[10px]">
+                            <label class="flex items-center gap-1 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 cursor-pointer hover:bg-slate-200">
+                                <input type="checkbox" ${tasks.pre ? 'checked' : ''} onchange="toggleSubTask('${item.id}', 'pre')" class="rounded text-sky-600 focus:ring-sky-500 w-3 h-3">
+                                <span class="${tasks.pre ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">Pre-Check</span>
+                            </label>
+
+                            <label class="flex items-center gap-1 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 cursor-pointer hover:bg-slate-200">
+                                <input type="checkbox" ${tasks.air ? 'checked' : ''} onchange="toggleSubTask('${item.id}', 'air')" class="rounded text-sky-600 focus:ring-sky-500 w-3 h-3">
+                                <span class="${tasks.air ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">Airflow</span>
+                            </label>
+
+                            <label class="flex items-center gap-1 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 cursor-pointer hover:bg-slate-200">
+                                <input type="checkbox" ${tasks.water ? 'checked' : ''} onchange="toggleSubTask('${item.id}', 'water')" class="rounded text-sky-600 focus:ring-sky-500 w-3 h-3">
+                                <span class="${tasks.water ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">Water</span>
+                            </label>
+
+                            <label class="flex items-center gap-1 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 cursor-pointer hover:bg-slate-200">
+                                <input type="checkbox" ${tasks.vcd ? 'checked' : ''} onchange="toggleSubTask('${item.id}', 'vcd')" class="rounded text-sky-600 focus:ring-sky-500 w-3 h-3">
+                                <span class="${tasks.vcd ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">VCD</span>
+                            </label>
+
+                            <label class="flex items-center gap-1 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 cursor-pointer hover:bg-slate-200">
+                                <input type="checkbox" ${tasks.report ? 'checked' : ''} onchange="toggleSubTask('${item.id}', 'report')" class="rounded text-sky-600 focus:ring-sky-500 w-3 h-3">
+                                <span class="${tasks.report ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">Report</span>
+                            </label>
+                        </div>
+                    </td>
+
+                    <td class="py-3 px-4 text-xs text-slate-600">
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[10px] font-bold">
+                                ${item.tech.charAt(0).toUpperCase()}
+                            </div>
+                            <span>${escapeHtml(item.tech)}</span>
+                        </div>
+                    </td>
+
+                    <td class="py-3 px-4 text-[11px] text-slate-500">
+                        ${item.updatedAt}
+                    </td>
+
+                    <td class="py-3 px-4 text-xs text-slate-600 max-w-xs truncate" title="${escapeHtml(item.notes || '')}">
+                        ${item.notes ? escapeHtml(item.notes) : '<span class="text-slate-400 italic">No notes</span>'}
+                    </td>
+
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center gap-1">
+                            <button onclick="editItem('${item.id}')" class="p-1.5 text-slate-500 hover:text-sky-600 hover:bg-sky-50 rounded transition" title="Edit Tag">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteItem('${item.id}')" class="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded transition" title="Delete Tag">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Status toggle handler
+        function toggleMainStatus(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+
+            if (item.status === 'COMPLETED') {
+                item.status = 'PENDING';
+                showToast(`Tag ${item.tag} marked as PENDING.`, "fa-clock");
+            } else {
+                item.status = 'COMPLETED';
+                item.tasks = { pre: true, air: true, water: true, vcd: true, report: true };
+                showToast(`Tag ${item.tag} marked as COMPLETED!`, "fa-circle-check");
+            }
+
+            item.updatedAt = getCurrentTimestamp();
+            saveToStorage();
+            renderTable();
+        }
+
+        // Subtask toggle handler
+        function toggleSubTask(id, taskKey) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+
+            if (!item.tasks) {
+                item.tasks = { pre: false, air: false, water: false, vcd: false, report: false };
+            }
+
+            item.tasks[taskKey] = !item.tasks[taskKey];
+            item.updatedAt = getCurrentTimestamp();
+
+            const allChecked = Object.values(item.tasks).every(Boolean);
+            if (allChecked && item.status !== 'COMPLETED') {
+                item.status = 'COMPLETED';
+                showToast(`All checks finished for ${item.tag} - Marked COMPLETED!`, "fa-circle-check");
+            }
+
+            saveToStorage();
+            renderTable();
+        }
+
+        // Delete item handler
+        function deleteItem(id) {
+            const item = items.find(i => i.id === id);
+            if (item && confirm(`Delete equipment tag '${item.tag}'?`)) {
+                items = items.filter(i => i.id !== id);
+                saveToStorage();
+                populateFloorFilter();
+                renderTable();
+                showToast(`Tag ${item.tag} deleted successfully.`, "fa-trash-can");
+            }
+        }
+
+        // Modal opening & editing form handler
+        function openModal(editId = null) {
+            const modal = document.getElementById('item-modal');
+            const form = document.getElementById('equipment-form');
+            const title = document.getElementById('modal-title');
+
+            form.reset();
+
+            if (editId) {
+                const item = items.find(i => i.id === editId);
+                if (!item) return;
+
+                title.textContent = "Edit Equipment Work Tag";
+                document.getElementById('form-id').value = item.id;
+                document.getElementById('form-tag').value = item.tag;
+                document.getElementById('form-system').value = item.system;
+                document.getElementById('form-floor').value = item.floor;
+                document.getElementById('form-tech').value = item.tech;
+                document.getElementById('form-status').value = item.status;
+                document.getElementById('form-notes').value = item.notes || '';
+
+                const t = item.tasks || {};
+                document.getElementById('form-task-pre').checked = !!t.pre;
+                document.getElementById('form-task-air').checked = !!t.air;
+                document.getElementById('form-task-water').checked = !!t.water;
+                document.getElementById('form-task-vcd').checked = !!t.vcd;
+                document.getElementById('form-task-report').checked = !!t.report;
+            } else {
+                title.textContent = "Add Equipment Work Tag";
+                document.getElementById('form-id').value = '';
+                document.getElementById('form-task-pre').checked = false;
+                document.getElementById('form-task-air').checked = false;
+                document.getElementById('form-task-water').checked = false;
+                document.getElementById('form-task-vcd').checked = false;
+                document.getElementById('form-task-report').checked = false;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('item-modal').classList.add('hidden');
+        }
+
+        function editItem(id) {
+            openModal(id);
+        }
+
+        // Form Submit Handler
+        function saveItem(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('form-id').value;
+            const tag = document.getElementById('form-tag').value.trim().toUpperCase();
+            const system = document.getElementById('form-system').value;
+            const floor = document.getElementById('form-floor').value.trim();
+            const tech = document.getElementById('form-tech').value.trim();
+            const status = document.getElementById('form-status').value;
+            const notes = document.getElementById('form-notes').value.trim();
+
+            const tasks = {
+                pre: document.getElementById('form-task-pre').checked,
+                air: document.getElementById('form-task-air').checked,
+                water: document.getElementById('form-task-water').checked,
+                vcd: document.getElementById('form-task-vcd').checked,
+                report: document.getElementById('form-task-report').checked
+            };
+
+            const timestamp = getCurrentTimestamp();
+
+            if (id) {
+                const index = items.findIndex(i => i.id === id);
+                if (index !== -1) {
+                    items[index] = { ...items[index], tag, system, floor, tech, status, tasks, notes, updatedAt: timestamp };
+                    showToast(`Updated equipment tag ${tag}`, "fa-pen-to-square");
+                }
+            } else {
+                const newItem = {
+                    id: Date.now().toString(),
+                    tag,
+                    system,
+                    floor,
+                    tech,
+                    status,
+                    tasks,
+                    notes,
+                    updatedAt: timestamp
+                };
+                items.unshift(newItem);
+                showToast(`Added new equipment tag ${tag}`, "fa-plus");
+            }
+
+            saveToStorage();
+            populateFloorFilter();
+            renderTable();
+            closeModal();
+        }
+
+        // CSV Export Feature
+        function exportToCSV() {
+            if (items.length === 0) {
+                alert("No site data to export.");
+                return;
+            }
+
+            const headers = ["Unit Tag ID", "System Type", "Floor / Area", "Overall Status", "Pre-Check", "Airflow Check", "Water Check", "VCD Check", "Report Ready", "Assigned Tech", "Last Updated", "Field Notes"];
+            
+            const rows = items.map(i => {
+                const t = i.tasks || {};
+                return [
+                    `"${i.tag}"`,
+                    `"${i.system}"`,
+                    `"${i.floor}"`,
+                    `"${i.status}"`,
+                    `"${t.pre ? 'PASSED' : 'PENDING'}"`,
+                    `"${t.air ? 'PASSED' : 'PENDING'}"`,
+                    `"${t.water ? 'PASSED' : 'PENDING'}"`,
+                    `"${t.vcd ? 'PASSED' : 'PENDING'}"`,
+                    `"${t.report ? 'PASSED' : 'PENDING'}"`,
+                    `"${i.tech}"`,
+                    `"${i.updatedAt}"`,
+                    `"${(i.notes || '').replace(/"/g, '""')}"`
+                ];
+            });
+
+            const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `TAB_Site_Report_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast("TAB Site Summary exported as CSV!", "fa-file-csv");
+        }
+
+        // HTML Escape helper
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
+        }
+
+        // Initialize App on DOM Load
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
