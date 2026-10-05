@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -175,12 +174,11 @@
                 <!-- System Filter -->
                 <select id="filter-system" onchange="renderViews()" class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500">
                     <option value="ALL">All Systems</option>
-                    <option value="AHU">AHU (Air Handling)</option>
-                    <option value="FCU">FCU (Fan Coil)</option>
-                    <option value="FAHU">FAHU Box</option>
-                    <option value="VCD">VCD (Volume Installed)</option>
-                    <option value="PUMP">Chilled Water Pump</option>
-                    <option value="DAMPER">Fire Damper</option>
+                    <option value="FCU">FCU</option>
+                    <option value="FAHU">FAHU</option>
+                    <option value="CHW">CHW</option>
+                    <option value="JETFANS">JETFANS</option>
+                    <option value="HOTWATER">HOTWATER</option>
                 </select>
 
                 <!-- Floor Filter -->
@@ -291,12 +289,11 @@
                     <div>
                         <label class="block text-[11px] font-semibold text-slate-700 mb-1">System Type *</label>
                         <select id="form-system" required class="w-full px-2.5 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                            <option value="AHU">AHU - Air Handling</option>
                             <option value="FCU">FCU - Fan Coil Unit</option>
-                            <option value="VAV">VAV - Variable Air</option>
-                            <option value="VCD">VCD - Dampers</option>
-                            <option value="PUMP">Pump - Chilled Water</option>
-                            <option value="DAMPER">Fire/Smoke Damper</option>
+                            <option value="FAHU">FAHU - Fresh Air Handling Unit</option>
+                            <option value="CHW">CHW - Chilled Water</option>
+                            <option value="JETFANS">JETFANS</option>
+                            <option value="HOTWATER">HOTWATER</option>
                         </select>
                     </div>
                 </div>
@@ -368,7 +365,7 @@
     </div>
 
     <!-- Custom Toast Notification -->
-    <div id="toast" class="fixed bottom-16 sm:bottom-5 right-4 left-4 sm:left-auto bg-slate-900 text-white px-4 py-2.5 rounded-lg shadow-xl text-xs flex items-center justify-between sm:justify-start gap-3 transition-all duration-300 opacity-0 translate-y-10 pointer-events-none z-50">
+    <div id="toast" class="fixed bottom-16 sm:bottom-5 right-4 left-4 sm:left-auto bg-slate-900 text-white px-4 py-2.5 rounded-lg shadow-xl text-xs flex items-center justify-between sm:justify-start gap-2.5 opacity-0 translate-y-10 pointer-events-none transition-all duration-300 z-50">
         <div class="flex items-center gap-2.5">
             <i id="toast-icon" class="fa-solid fa-circle-info text-sky-400 text-base"></i>
             <span id="toast-msg">Operation completed</span>
@@ -381,7 +378,7 @@
             {
                 id: '1',
                 tag: 'AHU-L01-01',
-                system: 'AHU',
+                system: 'FCU',
                 floor: 'Level 1',
                 tech: 'Dave / Team A',
                 status: 'COMPLETED',
@@ -403,7 +400,7 @@
             {
                 id: '3',
                 tag: 'VAV-L02-12',
-                system: 'VAV',
+                system: 'CHW',
                 floor: 'Level 2',
                 tech: 'Dave / Team A',
                 status: 'PENDING',
@@ -414,7 +411,7 @@
             {
                 id: '4',
                 tag: 'VCD-L02-08',
-                system: 'VCD',
+                system: 'FAHU',
                 floor: 'Level 2',
                 tech: 'Alex / Team C',
                 status: 'COMPLETED',
@@ -425,7 +422,7 @@
             {
                 id: '5',
                 tag: 'CHWP-B1-02',
-                system: 'PUMP',
+                system: 'CHW',
                 floor: 'Basement 1',
                 tech: 'Dave / Team A',
                 status: 'COMPLETED',
@@ -436,7 +433,7 @@
             {
                 id: '6',
                 tag: 'FD-L03-01',
-                system: 'DAMPER',
+                system: 'JETFANS',
                 floor: 'Level 3',
                 tech: 'Sam / Team B',
                 status: 'PENDING',
@@ -933,7 +930,7 @@
                 return;
             }
 
-            const headers = ["Unit Tag ID", "System Type", "Floor / Area", "Overall Status", "Pre-Check", "Airflow Check", "Water Check", "VCD Check", "Report Ready", "Assigned Tech", "Last Updated", "Field Notes"];
+            const headers = ["Unit Tag ID", "System Type", "Floor / Area", "Overall Status", "Pre-Check", "Airflow Check", "Water Check", "VCD Check", "Report Ready", "Assigned Tech", "Last Updated", "Remarks"];
             
             const rows = items.map(i => {
                 const t = i.tasks || {};
@@ -972,7 +969,7 @@
             return str.replace(/&/g, "&amp;")
                       .replace(/</g, "&lt;")
                       .replace(/>/g, "&gt;")
-                      .replace(/"/g, "&quot;")
+                      .replace(/\"/g, "&quot;")
                       .replace(/'/g, "&#039;");
         }
 
