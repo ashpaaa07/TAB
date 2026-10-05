@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>TAB Site Work Tracking Mobile Dashboard</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -51,7 +51,7 @@
 
     <!-- TOP NAVIGATION HEADER -->
     <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30 border-b border-slate-800">
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div class="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             
             <!-- Logo & Title -->
             <div class="flex items-center justify-between">
@@ -90,7 +90,7 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 w-full space-y-4 sm:space-y-6">
+    <main class="max-w-screen-2xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 w-full space-y-4 sm:space-y-6">
 
         <!-- METRICS / SUMMARY BAR (2x2 Grid on Mobile, 4-Col on Desktop) -->
         <section class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
@@ -197,18 +197,32 @@
                     <i class="fa-solid fa-list-check text-sky-600"></i>
                     <h2 class="font-semibold text-slate-800 text-xs sm:text-sm">Site Work Inspection Checklist</h2>
                 </div>
-                <div class="text-[11px] sm:text-xs text-slate-500">
-                    Showing <span id="visible-count" class="font-bold text-slate-700">0</span> units
+                <div class="flex items-center gap-3">
+                    <div class="text-[11px] sm:text-xs text-slate-500 whitespace-nowrap">
+                        Showing <span id="visible-count" class="font-bold text-slate-700">0</span> units
+                    </div>
+                    <!-- View Mode Switch: Auto / Cards / Table -->
+                    <div class="flex items-center gap-0.5 bg-slate-200/70 p-0.5 rounded-lg" role="group" aria-label="Layout view">
+                        <button onclick="setViewMode('auto')" id="view-btn-auto" title="Auto (match screen size)" class="view-btn px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition flex items-center gap-1">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i><span class="hidden md:inline">Auto</span>
+                        </button>
+                        <button onclick="setViewMode('cards')" id="view-btn-cards" title="Mobile card view" class="view-btn px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition flex items-center gap-1">
+                            <i class="fa-solid fa-mobile-screen"></i><span class="hidden md:inline">Cards</span>
+                        </button>
+                        <button onclick="setViewMode('table')" id="view-btn-table" title="Desktop table view" class="view-btn px-2.5 py-1.5 rounded-md text-[11px] font-semibold transition flex items-center gap-1">
+                            <i class="fa-solid fa-desktop"></i><span class="hidden md:inline">Desktop</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- 1. MOBILE FIELD CARDS VIEW (Displays on small screens < md) -->
-            <div id="mobile-cards-container" class="block md:hidden divide-y divide-slate-100 p-2 space-y-3">
+            <div id="mobile-cards-container" class="block md:hidden p-2 space-y-3">
                 <!-- Dynamically populated via JS -->
             </div>
 
             <!-- 2. DESKTOP TABLE VIEW (Displays on screens >= md) -->
-            <div class="hidden md:block overflow-x-auto">
+            <div id="desktop-table-container" class="hidden md:block overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[850px]">
                     <thead>
                         <tr class="bg-slate-100/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
@@ -352,7 +366,7 @@
     </div>
 
     <footer class="bg-white border-t border-slate-200 py-3 sm:py-4 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 text-center text-[11px] sm:text-xs text-slate-500">
+        <div class="max-w-screen-2xl mx-auto px-4 text-center text-[11px] sm:text-xs text-slate-500">
             TAB Site Work Tracking Dashboard &bull; HVAC Field Checklist System
         </div>
     </footer>
@@ -431,6 +445,38 @@
         // State variables
         let items = [];
         let currentStatusFilter = 'ALL';
+        let viewMode = localStorage.getItem('tab_site_view_mode') || 'auto';
+
+        // Switch between auto (responsive), card and desktop table layouts
+        function setViewMode(mode) {
+            viewMode = mode;
+            localStorage.setItem('tab_site_view_mode', mode);
+            applyViewMode();
+        }
+
+        function applyViewMode() {
+            const cards = document.getElementById('mobile-cards-container');
+            const table = document.getElementById('desktop-table-container');
+
+            if (viewMode === 'table') {
+                cards.className = 'hidden';
+                table.className = 'block overflow-x-auto';
+            } else if (viewMode === 'cards') {
+                cards.className = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 p-2 sm:p-4';
+                table.className = 'hidden';
+            } else {
+                cards.className = 'block md:hidden p-2 space-y-3';
+                table.className = 'hidden md:block overflow-x-auto';
+            }
+
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                const active = btn.id === `view-btn-${viewMode}`;
+                btn.classList.toggle('bg-white', active);
+                btn.classList.toggle('shadow-sm', active);
+                btn.classList.toggle('text-sky-700', active);
+                btn.classList.toggle('text-slate-500', !active);
+            });
+        }
 
         // Load items from local storage or set defaults
         function initApp() {
@@ -446,6 +492,7 @@
             }
 
             populateFloorFilter();
+            applyViewMode();
             renderTable();
             updateMetrics();
         }
