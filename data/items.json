@@ -1,0 +1,68 @@
+[
+  {
+    "id": "1",
+    "tag": "AHU-L01-01",
+    "system": "FCU",
+    "floor": "Level 1",
+    "tech": "Dave / Team A",
+    "status": "COMPLETED",
+    "tasks": { "pre": true, "air": true, "water": true, "vcd": true, "report": true },
+    "updatedAt": "2026-09-10 14:30",
+    "notes": "Design 4500 CFM achieved (Actual 4480 CFM). Sound level normal."
+  },
+  {
+    "id": "2",
+    "tag": "FCU-L01-04",
+    "system": "FCU",
+    "floor": "Level 1",
+    "tech": "Sam / Team B",
+    "status": "PENDING",
+    "tasks": { "pre": true, "air": true, "water": false, "vcd": false, "report": false },
+    "updatedAt": "2026-09-11 09:15",
+    "notes": "Chilled water valve actuator needs recalibration."
+  },
+  {
+    "id": "3",
+    "tag": "VAV-L02-12",
+    "system": "CHW",
+    "floor": "Level 2",
+    "tech": "Dave / Team A",
+    "status": "PENDING",
+    "tasks": { "pre": true, "air": false, "water": false, "vcd": false, "report": false },
+    "updatedAt": "2026-09-11 11:00",
+    "notes": "Waiting for BMS integration check before balancing."
+  },
+  {
+    "id": "4",
+    "tag": "VCD-L02-08",
+    "system": "FAHU",
+    "floor": "Level 2",
+    "tech": "Alex / Team C",
+    "status": "COMPLETED",
+    "tasks": { "pre": true, "air": true, "water": true, "vcd": true, "report": true },
+    "updatedAt": "2026-09-09 16:45",
+    "notes": "Quadrant damper locked and tagged."
+  },
+  {
+    "id": "5",
+    "tag": "CHWP-B1-02",
+    "system": "CHW",
+    "floor": "Basement 1",
+    "tech": "Dave / Team A",
+    "status": "COMPLETED",
+    "tasks": { "pre": true, "air": true, "water": true, "vcd": true, "report": true },
+    "updatedAt": "2026-09-12 08:20",
+    "notes": "Flow rate 350 GPM verified via ultrasonic meter."
+  },
+  {
+    "id": "6",
+    "tag": "FD-L03-01",
+    "system": "JETFANS",
+    "floor": "Level 3",
+    "tech": "Sam / Team B",
+    "status": "PENDING",
+    "tasks": { "pre": false, "air": false, "water": false, "vcd": false, "report": false },
+    "updatedAt": "2026-09-08 10:00",
+    "notes": "Fusible link test pending fire alarm team arrival."
+  }
+]
